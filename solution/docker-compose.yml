@@ -66,12 +66,24 @@ services:
       - 9300:9300
     environment:
       http.host: 0.0.0.0
-      network.host: 0.0.0.0
-      transport.host: 127.0.0.1
+      transport.host: 0.0.0.0
       discovery.type: "single-node"
       xpack.security.enabled: "false"
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       ES_JAVA_OPTIONS: "-Xms1g -Xmx1g"
+
+  flask-server:
+    container_name: flask-server
+    build:
+      context: ./flask_server
+      dockerfile: ./Dockerfile
+    ports:
+      - 56733:80
+    environment:
+      FLASK_DEBUG: 1
+      FLASK_ENV: development
+    volumes:
+      - ./flask_server:/app
 
   # elasticsearch:
   #   container_name: elasticsearch1
