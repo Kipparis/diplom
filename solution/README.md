@@ -25,6 +25,20 @@ Inside of scrapy project:
 + `scrapy crawl github -a topic=ukkonen -a language=python` how to run
 + `scrapy shell 'url'` open scrapy shell at url
 
+# scrapyd
+
++ `scrapyd`: в контейнере. аккумулирует проекты scrapy и может запускать их. там есть какой-то конфиг.
++ `scrapyd-client`: удобная утилита для деплоя локальных проектов на сервер с `scrapyd`
++ `scrapyd-deploy` (внутри директории с `scrapy.cfg`): деплоит проект на сервер
+
+https://scrapyd.readthedocs.io/en/latest/api.html# : как пользоваться сервером со scrapy
+
++ `http://localhost:6800/listprojects.json`: список проектов
++ `http://localhost:6800/listspiders.json?project=myproject`: список павуков
++ `http://localhost:6800/schedule.json -d project=myproject -d spider=somespider`: запустить павука из проекта
++ `http://localhost:6800/schedule.json -d project=myproject -d spider=somespider`: запустить павука из проекта
++ `http://localhost:6800/schedule.json -d project=algo_search -d spider=github -d topic=ukkonen -d language=python`: запустить павука из проекта и передать ему аргументы
+
 # elastic search
 
 + `http://localhost:9200/algorithms-events/_search?pretty`: see events in topic

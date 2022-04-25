@@ -1,0 +1,13 @@
+setup.py
+algo_search/__init__.py
+algo_search/items.py
+algo_search/middlewares.py
+algo_search/pipelines.py
+algo_search/settings.py
+algo_search/spiders/__init__.py
+algo_search/spiders/github_spider.py
+project.egg-info/PKG-INFO
+project.egg-info/SOURCES.txt
+project.egg-info/dependency_links.txt
+project.egg-info/entry_points.txt
+project.egg-info/top_level.txt
