@@ -85,6 +85,12 @@ services:
     volumes:
       - ./flask_server:/app
 
+  scrapyd:
+    image: vimagick/scrapyd:py3
+    container_name: scrapyd
+    ports:
+      - 6800:6800
+
   # elasticsearch:
   #   container_name: elasticsearch1
   #   build:
