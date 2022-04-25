@@ -1,0 +1,56 @@
+body, html
+{
+	height: 100%;
+	margin: 0pt;
+}
+
+h1.main_header
+{
+	text-align: center;
+	margin: 0pt;
+}
+
+div.content
+{
+	height: 100%;
+}
+
+div.search_box_container
+{
+	height: 90%;
+	/* width: 20%; */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+div.search_box_container form
+{
+	display: flex;
+	width: 40%;
+	height: 5%;
+	justify-content: space-around;
+	flex-direction: row;
+}
+
+div.search_box_container form input
+{
+	width: 100%;
+}
+
+div.horizontal_options
+{
+	height: 90%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-around;
+}
+
+div.option_type
+{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-content: space-around;
+}

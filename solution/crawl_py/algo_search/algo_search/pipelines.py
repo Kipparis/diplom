@@ -35,6 +35,7 @@ class AlgoSearchPipeline:
         # check if it has some forbidden keywords
         payload = dict(item)
         payload.update({"spider_name": spider.name,
-                        "start_urls": spider.start_urls})
+                        "start_urls": spider.start_urls,
+                        "topic": spider.topic})
         self.producer.send(self.kafka_topic, value=payload)
         return item

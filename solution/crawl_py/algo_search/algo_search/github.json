@@ -1,0 +1,19 @@
+[
+{"repo_url": "https://github.com/mazdaka/SuffixTree", "language": "Python", "about": "\n      Optimized implementation of suffix tree in python using Ukkonen's algorithm.\n    ", "popularity": "37"},
+{"repo_url": "https://github.com/maclandrol/SuffixTreeJS", "language": "JavaScript", "about": "\n      Generalized suffix tree (Ukkonen's algorithm) in javascript. \n    ", "popularity": "34"},
+{"repo_url": "https://github.com/cassandradanger/ukkonen_jquery_serverside_calc", "language": "JavaScript", "about": null, "popularity": "0"},
+{"repo_url": "https://github.com/maxgarfinkel/suffixTree", "language": "Java", "about": "\n      A java implementation of Ukkonen's suffix tree creation algorithm\n    ", "popularity": "19"},
+{"repo_url": "https://github.com/mutux/Ukkonen-s-Suffix-Tree-Algorithm", "language": "Python", "about": "\n      Ukkonen's suffix tree algorithm, a complete version implemented in Python\n    ", "popularity": "21"},
+{"repo_url": "https://github.com/schmidda/ukkonen-suffixtree", "language": "C", "about": "\n      A C implementation of Ukkonen's suffix tree-building algorithm, with test suite and tree print.\n    ", "popularity": "18"},
+{"repo_url": "https://github.com/abahgat/suffixtree", "language": "Java", "about": "\n      A Java implementation of a Generalized Suffix Tree using Ukkonen's algorithm\n    ", "popularity": "103"},
+{"repo_url": "https://github.com/sunesimonsen/ukkonen", "language": "JavaScript", "about": "\n      Ukkonen's Approximate String Matching algorithm\n    ", "popularity": "119"},
+{"repo_url": "https://github.com/atuljangra/Ukkonen-SuffixTree", "language": "C++", "about": "\n      A C++ implementation of a Generalized Suffix Tree using Ukkonen's algorithm\n    ", "popularity": "19"},
+{"repo_url": "https://github.com/brenden/ukkonen-animation", "language": "Elm", "about": "\n      Visualization of Ukkonen's algorithm\n    ", "popularity": "80"},
+{"repo_url": "https://github.com/irachex/suffix_tree", "language": "Python", "about": "\n      Ukkonen's suffix tree in python\n    ", "popularity": "2"},
+{"repo_url": "https://github.com/murraycu/murrayc-suffix-tree", "language": "C++", "about": "\n      An experiment with modern C++, suffix trees, and Ukkonen's algorithm for suffix tree construction.\n    ", "popularity": "10"},
+{"repo_url": "https://github.com/cassandradanger/ukkonen_express_intro_v1", "language": "JavaScript", "about": null, "popularity": "0"},
+{"repo_url": "https://github.com/cceh/suffix-tree", "language": "Python", "about": "\n      A Generalized Suffix Tree for any Python iterable using Ukkonen's algorithm, with Lowest Common Ancestor retrieval.\n    ", "popularity": "14"},
+{"repo_url": "https://github.com/ljfuyuan/suffixtree", "language": "Go", "about": "\n      A Go implementation of a Generalized Suffix Tree using Ukkonen's algorithm\n    ", "popularity": "5"},
+{"repo_url": "https://github.com/jayrbolton/node-suffix-tree", "language": "JavaScript", "about": "\n      Efficient suffix trees with Ukkonen's algorithm in nodejs\n    ", "popularity": "13"},
+{"repo_url": "https://github.com/xrash/smetrics", "language": "Go", "about": "\n      String metrics library written in Go.\n    ", "popularity": "185"}
+]

@@ -1,14 +1,25 @@
 import scrapy
 import json
+from urllib.parse import urlencode
 
 class GithubSpider(scrapy.Spider):
     name = "github"
+    custom_settings = {
+        "lang_mapping": {
+            "python": "Python",
+        },
+    }
 
-    def __init__(self, topic=None, *args, **kwargs):
+    def __init__(self, topic=None, language=None, *args, **kwargs):
         super(GithubSpider, self).__init__(*args, **kwargs)
 
         assert topic is not None, "you should provide topic variable via cmd"
-        self.start_urls = [f"https://github.com/search?q={topic}"]
+        self.topic = topic
+
+        params = { "q": topic, }
+        if language is not None:
+            params.update({"l": self.custom_settings["lang_mapping"][language]})
+        self.start_urls = [f"https://github.com/search?"+urlencode(params)]
 
 
     def parse(self, response):
@@ -37,6 +48,12 @@ class GithubSpider(scrapy.Spider):
         ### берем первый из списка, на проценты не смотрим
         language = response.xpath(
             '//h2[text() = "Languages"]/parent::div/ul/li/a/span/text()').get()
+        # если существует конверсия в мой внутренний тип языка, то используем
+        # его
+        for key, val in self.custom_settings["lang_mapping"].items():
+            if language == val:
+                language = key
+                break
 
         ### about
         ### у каждого репо есть короткое описание о чем он
@@ -46,7 +63,7 @@ class GithubSpider(scrapy.Spider):
         ### популярность (валидна для гитхаба)
         ### (при выводе для каждого сайта надо нормализовать)
         popularity = response.xpath(
-            '//a[contains(@class, "social-count")]/text()').get()
+            '//span[contains(@class, "social-count")]/text()').get()
 
         # change how yield works
         yield {'repo_url': response.url,

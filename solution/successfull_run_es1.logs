@@ -1,0 +1,57 @@
+OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+OpenJDK 64-Bit Server VM warning: UseAVX=2 is not supported on this CPU, setting it to UseAVX=1
+[2022-04-14T12:56:56,125][WARN ][o.e.c.l.LogConfigurator  ] [unknown] Some logging configurations have %marker but don't have %node_name. We will automatically add %node_name to the pattern to ease the migration for users who customize log4j2.properties but will stop this behavior in 7.0. You should manually replace `%node_name` with `[%node_name]%marker ` in these locations:
+  /usr/share/elasticsearch/config/log4j2.properties
+[2022-04-14T12:56:56,693][INFO ][o.e.e.NodeEnvironment    ] [RwhErkG] using [1] data paths, mounts [[/ (overlay)]], net usable_space [97.9gb], net total_space [167.7gb], types [overlay]
+[2022-04-14T12:56:56,694][INFO ][o.e.e.NodeEnvironment    ] [RwhErkG] heap size [990.7mb], compressed ordinary object pointers [true]
+[2022-04-14T12:56:56,696][INFO ][o.e.n.Node               ] [RwhErkG] node name derived from node ID [RwhErkG-RYipVa4ZCRDaPA]; set [node.name] to override
+[2022-04-14T12:56:56,696][INFO ][o.e.n.Node               ] [RwhErkG] version[6.5.0], pid[1], build[default/tar/816e6f6/2018-11-09T18:58:36.352602Z], OS[Linux/4.19.233-1-MANJARO/amd64], JVM[Oracle Corporation/OpenJDK 64-Bit Server VM/11.0.1/11.0.1+13]
+[2022-04-14T12:56:56,696][INFO ][o.e.n.Node               ] [RwhErkG] JVM arguments [-Xms1g, -Xmx1g, -XX:+UseConcMarkSweepGC, -XX:CMSInitiatingOccupancyFraction=75, -XX:+UseCMSInitiatingOccupancyOnly, -XX:+AlwaysPreTouch, -Xss1m, -Djava.awt.headless=true, -Dfile.encoding=UTF-8, -Djna.nosys=true, -XX:-OmitStackTraceInFastThrow, -Dio.netty.noUnsafe=true, -Dio.netty.noKeySetOptimization=true, -Dio.netty.recycler.maxCapacityPerThread=0, -Dlog4j.shutdownHookEnabled=false, -Dlog4j2.disable.jmx=true, -Djava.io.tmpdir=/tmp/elasticsearch.7TmxiwWJ, -XX:+HeapDumpOnOutOfMemoryError, -XX:HeapDumpPath=data, -XX:ErrorFile=logs/hs_err_pid%p.log, -Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m, -Djava.locale.providers=COMPAT, -XX:UseAVX=2, -Des.cgroups.hierarchy.override=/, -Des.path.home=/usr/share/elasticsearch, -Des.path.conf=/usr/share/elasticsearch/config, -Des.distribution.flavor=default, -Des.distribution.type=tar]
+[2022-04-14T12:56:59,431][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [aggs-matrix-stats]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [analysis-common]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [ingest-common]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [lang-expression]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [lang-mustache]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [lang-painless]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [mapper-extras]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [parent-join]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [percolator]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [rank-eval]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [reindex]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [repository-url]
+[2022-04-14T12:56:59,432][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [transport-netty4]
+[2022-04-14T12:56:59,433][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [tribe]
+[2022-04-14T12:56:59,433][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-ccr]
+[2022-04-14T12:56:59,433][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-core]
+[2022-04-14T12:56:59,433][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-deprecation]
+[2022-04-14T12:56:59,433][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-graph]
+[2022-04-14T12:56:59,433][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-logstash]
+[2022-04-14T12:56:59,434][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-ml]
+[2022-04-14T12:56:59,434][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-monitoring]
+[2022-04-14T12:56:59,434][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-rollup]
+[2022-04-14T12:56:59,434][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-security]
+[2022-04-14T12:56:59,434][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-sql]
+[2022-04-14T12:56:59,434][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-upgrade]
+[2022-04-14T12:56:59,434][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded module [x-pack-watcher]
+[2022-04-14T12:56:59,436][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded plugin [ingest-geoip]
+[2022-04-14T12:56:59,436][INFO ][o.e.p.PluginsService     ] [RwhErkG] loaded plugin [ingest-user-agent]
+[2022-04-14T12:57:04,413][INFO ][o.e.x.s.a.s.FileRolesStore] [RwhErkG] parsed [0] roles from file [/usr/share/elasticsearch/config/roles.yml]
+[2022-04-14T12:57:05,303][INFO ][o.e.x.m.j.p.l.CppLogMessageHandler] [RwhErkG] [controller/74] [Main.cc@109] controller (64 bit): Version 6.5.0 (Build 71882a589e5556) Copyright (c) 2018 Elasticsearch BV
+[2022-04-14T12:57:06,364][INFO ][o.e.d.DiscoveryModule    ] [RwhErkG] using discovery type [single-node] and host providers [settings]
+[2022-04-14T12:57:07,044][INFO ][o.e.n.Node               ] [RwhErkG] initialized
+[2022-04-14T12:57:07,044][INFO ][o.e.n.Node               ] [RwhErkG] starting ...
+[2022-04-14T12:57:07,160][INFO ][o.e.t.TransportService   ] [RwhErkG] publish_address {172.26.0.2:9300}, bound_addresses {0.0.0.0:9300}
+[2022-04-14T12:57:07,176][WARN ][o.e.b.BootstrapChecks    ] [RwhErkG] max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+[2022-04-14T12:57:07,208][INFO ][o.e.x.s.t.n.SecurityNetty4HttpServerTransport] [RwhErkG] publish_address {172.26.0.2:9200}, bound_addresses {0.0.0.0:9200}
+[2022-04-14T12:57:07,209][INFO ][o.e.n.Node               ] [RwhErkG] started
+[2022-04-14T12:57:07,321][WARN ][o.e.x.s.a.s.m.NativeRoleMappingStore] [RwhErkG] Failed to clear cache for realms [[]]
+[2022-04-14T12:57:07,388][INFO ][o.e.g.GatewayService     ] [RwhErkG] recovered [0] indices into cluster_state
+[2022-04-14T12:57:07,561][INFO ][o.e.c.m.MetaDataIndexTemplateService] [RwhErkG] adding template [.watches] for index patterns [.watches*]
+[2022-04-14T12:57:07,655][INFO ][o.e.c.m.MetaDataIndexTemplateService] [RwhErkG] adding template [.watch-history-9] for index patterns [.watcher-history-9*]
+[2022-04-14T12:57:07,723][INFO ][o.e.c.m.MetaDataIndexTemplateService] [RwhErkG] adding template [.triggered_watches] for index patterns [.triggered_watches*]
+[2022-04-14T12:57:07,853][INFO ][o.e.c.m.MetaDataIndexTemplateService] [RwhErkG] adding template [.monitoring-logstash] for index patterns [.monitoring-logstash-6-*]
+[2022-04-14T12:57:07,973][INFO ][o.e.c.m.MetaDataIndexTemplateService] [RwhErkG] adding template [.monitoring-es] for index patterns [.monitoring-es-6-*]
+[2022-04-14T12:57:08,201][INFO ][o.e.c.m.MetaDataIndexTemplateService] [RwhErkG] adding template [.monitoring-alerts] for index patterns [.monitoring-alerts-6]
+[2022-04-14T12:57:08,497][INFO ][o.e.c.m.MetaDataIndexTemplateService] [RwhErkG] adding template [.monitoring-beats] for index patterns [.monitoring-beats-6-*]
+[2022-04-14T12:57:08,804][INFO ][o.e.c.m.MetaDataIndexTemplateService] [RwhErkG] adding template [.monitoring-kibana] for index patterns [.monitoring-kibana-6-*]
+[2022-04-14T12:57:09,198][INFO ][o.e.l.LicenseService     ] [RwhErkG] license [69de5738-2875-4bc9-8588-b36cca644ff9] mode [basic] - valid

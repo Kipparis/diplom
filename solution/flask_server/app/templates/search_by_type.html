@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Search by type{% endblock %}
+
+{% block content %}
+<h1 class="main_header">Поиск Алгоритмов по типу</h1>
+{% if search_object %}
+<p>Searching by {{ search_object }}</p>
+{% endif %}
+<div class="search_box_container">
+    {# использовать тут фишку для автосоздания url #}
+    <form action="/search_by_type" method="GET">
+        <input type="text" name="search_object">
+        <button type="submit">Search</button>
+    </form>
+</div>
+{% endblock %}

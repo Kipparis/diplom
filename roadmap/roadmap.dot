@@ -1,0 +1,102 @@
+// graphviz
+
+// green:  #4d9452
+// orange: #94724d
+// red:    #944d4d
+
+digraph tasks {
+    // configure graph
+    graph [
+        compound = true
+        bgcolor = "#262626"
+        size = "1920,1080"
+    ]
+    // configure nodes
+    node [
+        style=filled
+        fillcolor="#262626"
+        color="#262626"
+        fontcolor="#e6ebe5"
+    ]
+    // configure arrows
+    edge [
+        color = "#e6ebe5"
+        minlen = 2
+    ]
+    fontsize="30"
+
+    // node definitions
+    subgraph cluster_code_structure {
+        // red: #ed5c5c
+        // green: #61c968
+        // orange: #d9a164
+        fontcolor = "#e6ebe5"
+        color = "#ffffff"
+        label = "code structure"
+        labeljust = l
+        scrapy [ label =<
+            <font color="#61c968">parse github with scrapy</font>>];
+        kafka [ label =<
+            <font color="#61c968">initiate kafka (queue)</font>>];
+        elasticsearch [ label =<
+            <font color="#61c968">initiate elasticsearch (document db)</font>>];
+        flask [ label =<
+            <font color="#ed5c5c">initiate flask (web engine)</font>>];
+        merge_kafka [ label =<
+            <font color="#61c968">send scrapy messages to kafka</font>>];
+        merge_elastic [ label =<
+            <font color="#d9a164">send kafka messages to elasticsearch</font>>];
+        merge_flask [ label =<
+            <font color="#ed5c5c">display results</font>>];
+    }
+    subgraph cluster_code_logic {
+        // red: #ed5c5c
+        // green: #61c968
+        // orange: #d9a164
+        fontcolor = "#e6ebe5"
+        color = "#ffffff"
+        label = "code logic"
+        labeljust = l
+        inputfield [ label =<
+            <font color="#ed5c5c">input field for entering algo</font>>];
+        searching [ label =<
+            <font color="#ed5c5c">search for input field in local database and on sites</font>>];
+        cachingresults [ label =<
+            <font color="#ed5c5c">caching elasticsearch results</font>>];
+        displaying [ label =<
+            <font color="#ed5c5c">display what we found</font>>];
+        resultsscore [ label =<
+            <font color="#ed5c5c">display scores on algo/site</font>>];
+    }
+
+    subgraph cluster_interface {
+        // red: #ed5c5c
+        // green: #61c968
+        // orange: #d9a164
+        fontcolor = "#e6ebe5"
+        color = "#ffffff"
+        label = "outer interface"
+        labeljust = l
+        margin=50
+        cli_api [ label =<
+            <font color="#ed5c5c">implement CLI or/and API</font>>];
+    }
+
+
+    // edge definition
+    scrapy -> merge_kafka
+    kafka -> merge_kafka
+    merge_kafka -> merge_elastic
+    elasticsearch -> merge_elastic
+    merge_elastic -> merge_flask
+    flask -> merge_flask
+
+    merge_flask -> inputfield [ ltail = cluster_code_structure, lhead = cluster_code_logic ]
+    inputfield -> searching
+    searching -> cachingresults
+    searching -> displaying
+    cachingresults -> displaying
+    cachingresults -> resultsscore
+
+    inputfield -> cli_api [ ltail = cluster_code_logic, lhead = cluster_interface ]
+}

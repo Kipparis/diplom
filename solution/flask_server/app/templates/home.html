@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block title %}Home page{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: red; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<h1 class="main_header">Поиск Алгоритмов</h1>
+<div class="horizontal_options">
+    <div class="option_type">
+        <span><a href="{{ url_for('search_by_name') }}">По имени</a></span>
+        <span>Сохраненные</span>
+    </div>
+    <div class="option_type">
+        <span><a href="{{ url_for('search_by_type')
+                }}">По типу</a></span>
+        <span>Сохраненные</span>
+    </div>
+</div>
+{% endblock %}

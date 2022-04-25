@@ -1,5 +1,6 @@
 # start
 
++ `docker run hello-world`: проверить что docker функционирует нормально
 + `docker-compose up -d`, `docker-compose down`
 
 # kafka
@@ -21,6 +22,7 @@ Inside of scrapy project:
 + `scrapy crawl github -O github.json` write scrapy contents to github.json
 + `scrapy crawl github -o github.jl` write scrapy contents to github.jl (json list)
 + `scrapy crawl github -O github.json -a topic=ukkonen` pass command line arguments
++ `scrapy crawl github -a topic=ukkonen -a language=python` how to run
 + `scrapy shell 'url'` open scrapy shell at url
 
 # elastic search
