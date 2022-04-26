@@ -91,5 +91,5 @@ language_to_extensions = {
     'javascript': 'js',
 }
 
-KAFKA_BOOTSTRAP_SERVER = "localhost:29092"
+KAFKA_BOOTSTRAP_SERVER = "kafka:29092"
 KAFKA_TOPIC = "algorithms-events"
