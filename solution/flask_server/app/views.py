@@ -40,15 +40,6 @@ def search_by_name():
         es_hits_resp = s.get('http://elasticsearch:9200/algorithms-events/_search?pretty',
                                     json=data_for_cache_hits,
                                     verify=False)
-        # es_hits_resp = s.get('http://localhost:9200/algorithms-events/_search?pretty',
-        #                             json=data_for_cache_hits,
-        #                             verify=False)
-        # es_hits_resp = requests.get('http://localhost:9200/algorithms-events/_search?pretty',
-        #                             json=data_for_cache_hits,
-        #                             verify=False)
-        # es_hits_resp = requests.get('http://elasticsearch:9200/algorithms-events/_search?pretty',
-        #                             json=data_for_cache_hits,
-        #                             verify=False)
         es_hits_data = es_hits_resp.json()
 
 
