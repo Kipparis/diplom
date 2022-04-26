@@ -86,7 +86,9 @@ services:
       - ./flask_server:/app
 
   scrapyd:
-    image: vimagick/scrapyd:py3
+    build:
+      context: ./scrapyd
+      dockerfile: ./Dockerfile
     container_name: scrapyd
     ports:
       - 6800:6800
