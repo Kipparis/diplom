@@ -6,6 +6,9 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - ./vol1/zk-data:/var/lib/zookeeper/data
+      - ./vol2/zk-txn-logs:/var/lib/zookeeper/log
     ports:
       - 22181:2181
 
@@ -16,6 +19,8 @@ services:
       - zookeeper
     ports:
       - 29092:29092
+    volumes:
+      - ./vol3/kafka-data:/var/lib/kafka/data
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -24,7 +29,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   connect:
-    image: confluentinc/cp-kafka-connect:3.3.0
+    build: ./kafka-connect
     container_name: kafka_connect
     ports:
       - 8083:8083
@@ -33,6 +38,8 @@ services:
       - kafka
     volumes:
       - $PWD/connect-plugins:/connect-plugins
+    # command:
+    #   - "bash -c /create_sink.sh"
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka:9092
       CONNECT_REST_PORT: 8083
@@ -64,6 +71,8 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    volumes:
+      - ./es-data:/usr/share/elasticsearch/data
     environment:
       http.host: 0.0.0.0
       transport.host: 0.0.0.0
@@ -92,6 +101,8 @@ services:
     container_name: scrapyd
     ports:
       - 6800:6800
+    volumes:
+      - ./scrapyd-data:/var/lib/scrapyd
 
   # elasticsearch:
   #   container_name: elasticsearch1

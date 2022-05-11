@@ -61,6 +61,8 @@ https://scrapyd.readthedocs.io/en/latest/api.html# : как пользовать
 Эта команда работает
 `docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:6.5.0`
 
+Еще одна трабла: https://stackoverflow.com/questions/59592518/kafka-broker-doesnt-find-cluster-id-and-creates-new-one-after-docker-restart
+
 # TUTORS
 
 ## kafka connect

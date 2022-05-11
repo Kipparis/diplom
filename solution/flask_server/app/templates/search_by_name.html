@@ -3,12 +3,50 @@
 {% block title %}Search by name{% endblock %}
 
 {% block content %}
-    <h1 class="main_header">Поиск Алгоритмов по имени</h1>
+	<h1 class="main_header">Поиск Алгоритмов по имени {{ search_object }}
+		{% if search_lang %} на {{ search_lang }} {% endif %}</h1>
+
     {% if search_object %}
-	<p>Searching by {{ search_object }} on language {{ search_lang }}</p>
+
+
+	{# TODO: implement #}
+	<p>Готовых ответов: ...</p>
+
+	{# Это нужно сделать раньше, чтобы можно было проверять #}
+	<p>Запрос на очистку данных в es:</p>
+		{# аналог для POST на урл вместе с json body #}
+		<form action="{{ url_for('clear_es') }}" method="get">
+			<input type="text" name="topic" value="{{ search_object }}" hidden>
+			<input type="text" name="language" value="{{ search_lang }}" hidden>
+            <button type="submit">clear</button>
+        </form>
+
+	<p>Запрос на обновление данных:</p>
+		{# аналог для curl URL -d arg1=val1 -d arg2=val2 #}
+		<form action="{{ url_for('update_es') }}" method="get">
+			<input type="text" name="topic" value="{{ search_object }}" hidden>
+			<input type="text" name="language" value="{{ search_lang }}" hidden>
+            <button type="submit">update</button>
+        </form>
+
+	<p>Сохраненно результатов: {{ hits_data|count }}</p>
+	{% if hits_data %}
+	<div class="hits_data">
+		{% for hit in hits_data|sort(attribute='popularity', reverse=True) %}
+		<div class="hit_data">
+			<a href='{{ hit.repo_url }}'>{{ hit.spider_name }}</a>
+			, {{ hit.popularity }}, {{ hit.about|trim }}
+		</div><br>
+		{% endfor %}
+	</div>
+	{% endif %}
+
+
+
+
+
     {% else %}
     <div class="search_box_container">
-        {# использовать тут фишку для автосоздания url #}
         <form action="{{ url_for('search_by_name') }}" method="GET">
 			<select name="search_lang">
 				<option value="python" selected>python</option>
