@@ -4,7 +4,7 @@ PDFLATEX='pdflatex -interaction=nonstopmode -shell-escape -file-line-error'
 GREP='grep ".*:[0-9]*:.*"' # показывает на выходе только ошибки
 
 # Файлы/Папки
-PDF_NAME='thesis.pdf'
+PDF_NAME='diplom.pdf'
 TEX='tex'
 IMG='tex/inc/img'
 MAINTEX='0-main'
