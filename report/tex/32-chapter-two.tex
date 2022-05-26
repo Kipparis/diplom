@@ -76,6 +76,8 @@ kafka используется zookeeper.
 реализации конкретных компонентов.
 
 \subsection{Docker}
+% TODO: рассказать как работает маппинг портов, как работают volumes, как
+% работает создаваемая сеть (например адресса kafka:9092)
 \subsection{Docker Compose}
 \subsection{Scrapy}
 Используя фреймворк Scrapy мы пишем абстрактные классы, называемые web-пауками,
@@ -248,6 +250,7 @@ def process_item(self, item, spider):
 \end{verbatim}
 
 % TODO: подробнее написать про логику вызовов pipeline
+% TODO: сделать сноску про то, как docker разрешает сетевые вызовы, например kafka:29092
 Модифицируем файл \verb|settings.py|, чтобы добавить туда необходиммые параметры
 для корректной работы.
 \begin{itemize}
@@ -279,9 +282,114 @@ KAFKA_TOPIC = "algorithms-events"
     \item \verb|-a topic=ukkonen| -- передает аргумент на вход паукам.
 \end{itemize}
 
+\subsection{Zookeeper}
+Перед разворачиванием kafka нужно сначала запусть zookeeper. Последний используется для синхронизации сервисов.
+
+В данном случае картинкой контейнера будет служить
+\verb|confluentinc/cp-zookeeper:latest|. Данная картинка позволяет заменить
+конфигурационный файл набором переменных окружения, которые следуют специальным
+правилам именования.
+
+Обязательным параметром при развертывании является \verb|ZOOKEEPER_CLIENT_PORT|
+-- порт, который прослушивается на входящие соединения. Также задаем параметр
+\verb|ZOOKEEPER_TICK_TIME| -- является базовой единицей измерения времени и
+регулирует таймауты.
+
+% TODO: сделать сноску почему для zookeeper важно хранить логи
+Далее, для того чтобы данные не стирались от запуска к запуску (например при
+перезагрузке), необходимо добавить ссылки на хранилище на хосте docker. Создаем
+папки \verb|vol1/zk-data| и \verb|vol2/zk-txn-logs| для хранения данных
+\verb|zookeeper|. Соотношение папок хоста к клиенту будет таким:
+\begin{itemize}
+    \item \verb|vol1/zk-data| -- \verb|/var/lib/zookeeper/data|
+    \item \verb|vol2/zk-txn-logs| -- \verb|/var/lib/zookeeper/log|
+\end{itemize}
+
+Также необходимо переопределить порты которые связаны с клиентов, чтобы не было
+случайных коллизий. Будем использовать порт на хосте 22181 и с него будут
+перенаправляться запросы на порт 2181 в \verb|zookeeper|.
+
+Даем запускаемому контейнеру имя \verb|zookeeper| и составляем часть файла
+развертывания \verb|docker-compose.yml|
+\begin{verbatim}
+zookeeper:
+  image: confluentinc/cp-zookeeper:latest
+  container_name: zookeeper
+  environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  volumes:
+      - ./vol1/zk-data:/var/lib/zookeeper/data
+      - ./vol2/zk-txn-logs:/var/lib/zookeeper/log
+  ports:
+      - 22181:2181
+\end{verbatim}
+
+
+\subsection{Kafka}
+Далее развернем менеджер сообщений. Он возмет на себя роль посредника между
+приложением, которое генерирует данные и приложением, которое эти данные должно
+получить.
+
+Для начала необходимо определиться с картинкой контейнера, которую хотим
+запустить. В нашем случае это будет \verb|confluentinc/cp-kafka:latest|.
+
+% TODO: о том, какие бывают протоколы безопасности подключений и как они
+% работают
+К обязательным параметрам при развертывании относятся:
+\begin{itemize}
+    \item \verb|KAFKA_ZOOKEEPER_CONNECT| -- как подключиться к \verb|zookeeper|.
+        Задаем значение \verb|zookeeper:2181|;
+    \item \verb|KAFKA_ADVERTISED_LISTENERS| -- описывается имя хоста и как оно
+        может быть достигнуто клиентами. Значение публикуется в
+        \verb|zookeeper|. Задаем значение
+        \verb|PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092|. Брокер
+        возвращает данное значение клиенту для того, чтобы показать куда
+        отправлять данные;
+    \item \verb|KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR| -- количество
+        дублирований, которые kafka создает на узлах. Должно быть меньше или
+        равно количеству запущенных узлов. В нашемм случае обязательно задать
+        единицу, так как базовое значение этого параметра равно трем;
+    \item \verb|KAFKA_LISTENER_SECURITY_PROTOCOL_MAP| -- задаем протокол
+        безопасности для подключений к указанным хостам. В нашем случае
+        \verb|PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT|.
+\end{itemize}
+
+Для того, чтобы уникально идентифицировать созданный узел, задаем ему
+\verb|broker.id| равным 1. Порты на хосте docker и в контейнере kafka оставляем
+одинаковыми (т.к. мы уже опредилили к какому порту подключаться при конфигурации
+kafka выше) -- 29092 к 29092.
+
+Далее нам потребуется сохранять данные от запуска к запуску. Поэтому создаем
+папки \verb|vol3/kafka-data| на хосте и указываем с какой папкой последняя из
+них будет соотносится -- \verb|/var/lib/kafka/data|.
+
+Совмещая все вышесказанное про kafka в структурированный docker-compose формат и
+получаем блок конфигурационного файла, который отвечает за развертывание kafka.
+\begin{verbatim}
+kafka:
+  image: confluentinc/cp-kafka:latest
+  container_name: kafka
+  depends_on: # запускаемся после zookeeper'а
+    - zookeeper
+  ports:
+    - 29092:29092
+  volumes:
+    - ./vol3/kafka-data:/var/lib/kafka/data
+  environment:
+    KAFKA_BROKER_ID: 1
+    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
+    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+    KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+\end{verbatim}
+
+Заметим, что сервис kafka должен запускаться строго после того, как запуститься
+менеджер сервисов zookeeper. По этой причине выше добавлена опция
+\verb|depends_on: - zookeeper|
+
+\subsection{Elastic Search}
+
 \subsection{Scrapyd}
 \subsection{Flask}
-\subsection{Kafka}
-\subsection{Zookeeper}
 \subsection{Kafka Connect}
-\subsection{Elastic Search}
