@@ -75,10 +75,6 @@ kafka используется zookeeper.
 Спроектировав основную архитектуру и используемые модули можно приступать к
 реализации конкретных компонентов.
 
-\subsection{Docker}
-% TODO: рассказать как работает маппинг портов, как работают volumes, как
-% работает создаваемая сеть (например адресса kafka:9092)
-\subsection{Docker Compose}
 \subsection{Scrapy}
 Используя фреймворк Scrapy мы пишем абстрактные классы, называемые web-пауками,
 каждый из которых можно настроить. В нем мы пишем логику перехода по ссылкам,
@@ -282,6 +278,8 @@ KAFKA_TOPIC = "algorithms-events"
     \item \verb|-a topic=ukkonen| -- передает аргумент на вход паукам.
 \end{itemize}
 
+% TODO: проверка работы
+
 \subsection{Zookeeper}
 Перед разворачиванием kafka нужно сначала запусть zookeeper. Последний используется для синхронизации сервисов.
 
@@ -325,6 +323,7 @@ zookeeper:
       - 22181:2181
 \end{verbatim}
 
+% TODO: проверка работы
 
 \subsection{Kafka}
 Далее развернем менеджер сообщений. Он возмет на себя роль посредника между
@@ -388,8 +387,402 @@ kafka:
 менеджер сервисов zookeeper. По этой причине выше добавлена опция
 \verb|depends_on: - zookeeper|
 
+% TODO: проверка работы
+
 \subsection{Elastic Search}
+Elasticsearch будет хранить и возвращать данные на постоянной основе. Данные
+принимаются согласно архитектуре -- от kafka, которая, в свою очередь принимает
+их от scrapy.
+
+Выбираем картинку конейнера. В нашем случае это \verb|elasticsearch:6.5.0|. Тут
+пришлось потратить много времени на выбор картинки, так как из-за запретов,
+некоторые картинки невозможно было скачать. Сразу же выбираем имя для
+работающего контейнера -- \verb|es1|
+
+Для того, чтобы данные оставались после перезагрузки контейнера, будем
+записывать некоторые папки на хост docker. Поэтому создаем папку \verb|es-data|
+на хосте и ставим ей в соответствие папку \verb|/usr/share/elasticsearch/data| в
+контейнере. Эти две папки имеют прямую синхронизацию, и, соответсвенно, при
+перезагрузке данные остануться.
+
+Далее задаем несколько параметров работы elasticsearch (большое количество
+настроек может быть обновленно во время работы с помощью специального
+интерфейса):
+\begin{itemize}
+    \item \verb|http.host: 0.0.0.0| -- адресс узла для входящих HTTP соединений;
+    \item \verb|transport.host: 0.0.0.0| -- адресс узла для коммуникации между узлами;
+    \item \verb|discovery.type: "single-node"| -- необходимый параметр для
+        запуска одного узла (данный узел объявляет себя мастер узлом и не
+        присоединяется к кластеру);
+    \item \verb|xpack.security.enabled: "false"| -- выключаем работу модуля
+        \verb|xpack.security|. Данный модуль можно использовать для настройки
+        анонимного доступа, аутентификации сообщений, уровней доступа к
+        документам и их полям и т.д.;
+    \item \verb|ES_JAVA_OPTS: "-Xms1g -Xmx1g"|, \verb|ES_JAVA_OPTIONS: "-Xms1g
+        -Xmx1g"| -- задаем начальный и максимальный размеры кучи для
+        elasticsearch;
+\end{itemize}
+
+Устанавливаем соответствие портов на хосте docker и контейнере:
+\verb|9200:9200|, \verb|9300:9300|.
+
+Получаем готовый файл конфигурации для запуска сервиса elasticsearch:
+\begin{verbatim}
+elasticsearch:
+  image: elasticsearch:6.5.0
+  container_name: es1
+  ports:
+    - 9200:9200
+    - 9300:9300
+  volumes:
+    - ./es-data:/usr/share/elasticsearch/data
+  environment:
+    http.host: 0.0.0.0
+    transport.host: 0.0.0.0
+    discovery.type: "single-node"
+    xpack.security.enabled: "false"
+    ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ES_JAVA_OPTIONS: "-Xms1g -Xmx1g"
+\end{verbatim}
+
+% TODO: проверка работы
+
+\subsection{Kafka Connect}
+Далее нужно настроить такое поведение, при котором kafka поступающие в топик
+сообщения будет перенаправлять в соответствующий индекс в elasticsearch. Для
+задач такого рода был создан продукт kafka connect.
+
+Выбираем картинку того же разработчика, от которого мы брали kafka и zookeeper
+-- \verb|confluentinc/cp-kafka-connect:3.3.0|.
+
+Для того, чтобы созданные коннекторы оставались от запуска к запуску,
+настраиваем синхронизацию папки \verb|/connect-plugins| с папкой
+\verb|connect-plugins| на хосте docker.
+
+Настраиваем установку с помощью параметров:
+\begin{itemize}
+    \item \verb|CONNECT_BOOTSTRAP_SERVERS: kafka:9092| -- где развернут брокер kafka;
+    \item \verb|CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181| -- где развернут zookeeper;
+    \item \verb|CONNECT_REST_PORT: 8083| -- порт для входящих соединений API;
+    \item \verb|CONNECT_PLUGIN_PATH: /connect-plugins| -- где будут
+        распологаться сами коннекторы; 
+    \item \verb|CONNECT_REST_ADVERTISED_HOST_NAME: "connect"| -- по какому хосту
+        клиентам можно отправлять сообщения;
+    \item \verb|CONNECT_GROUP_ID: "connect"| -- может быть любым, используется
+        для того, чтобы узлы определяли к какому кластеру они принадлежат;
+    \item \verb|CONNECT_CONFIG_STORAGE_TOPIC|,
+        \verb|CONNECT_OFFSET_STORAGE_TOPIC|, \verb|CONNECT_STATUS_STORAGE_TOPIC|
+        -- имена топиков, в которых сохранять служебную информацию;
+    \item \verb|CONNECT_REPLICATION_FACTOR|,
+        \verb|CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR|,
+        \verb|CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR|,
+        \verb|CONNECT_STATUS_STORAGE_REPLICATION_FACTOR| -- отвечают за
+        дублированние данных в кластере. Так как узел всего один, то в этих
+        параметрах ставим единицу;
+    \item \verb|CONNECT_KEY_CONVERTER|, \verb|CONNECT_VALUE_CONVERTER|,
+        \verb|CONNECT_INTERNAL_KEY_CONVERTER|,
+        \verb|CONNECT_INTERNAL_VALUE_CONVERTER| -- настройка для сериализации и
+        десериализации ключей и значений;
+    \item \verb|CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"| -- так как json
+        не включает в себя схему и не используется регистратор схем, то ставим
+        значение \verb|false|.
+\end{itemize}
+
+Получаем сегмент конфигурационного файла для развертывания сервиса kafka
+connect:
+\begin{verbatim}
+connect:
+  build: ./kafka-connect
+  container_name: kafka_connect
+  ports:
+    - 8083:8083
+  depends_on:
+    - zookeeper
+    - kafka
+  volumes:
+    - $PWD/connect-plugins:/connect-plugins
+  environment:
+    CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+    CONNECT_REST_PORT: 8083
+    CONNECT_GROUP_ID: "connect"
+    CONNECT_CONFIG_STORAGE_TOPIC: connect-config
+    CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+    CONNECT_STATUS_STORAGE_TOPIC: connect-status
+    CONNECT_REPLICATION_FACTOR: 1
+    CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+    CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+    CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+    CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+    CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+    CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+    CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+    CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+    CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+    CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181
+    CONNECT_PLUGIN_PATH: /connect-plugins
+\end{verbatim}
+
+% TODO: проверка работы
+
+\subsection{Flask}
+Далее реализуем часть, которая будет принимать и обрабатывать запросы
+пользователя, а затем, возвращать отображаемую страницу. Для этой подзадачи
+будем использовать web-фреймворк Flask. В нем нет специальной структуры
+директориев, правил работы с базами данных или файлами настроек, поэтому будем
+реализовывать эту часть сами.
+
+Начнем с выбора картинки контейнера, в нашем случае это будет
+\verb|tiangolo/uwsgi-nginx-flask:python3.8-alpine|. Как видно по названию,
+картинка уже включает в себя установленные \verb|nginx|, \verb|uwsgi| и
+\verb|flask|. Данные пакеты были поставлены на достаточно маленький дистрибутив
+\verb|Alpine Linux|, который не займет много времени для загрузки.
+
+Для начальной конфигурации контейнера, необходимо сделать несколько шагов
+(каждый из которых, создает новый слой картинки):
+\begin{enumerate}[label=\arabic*.]
+    \item Установить пакеты \verb|bash|, \verb|vim|;
+    \item Задать в переменных окружения значения для работы со статичными
+        данными (css, media) для Nginx: \verb|STATIC_URL| (по какому адрессу
+        получаются статичные данные), \verb|STATIC_PATH| (по какому пути в
+        системе эти данные достаются);
+    \item Задать переменные окружения для среды разработки: \verb|FLASK_ENV|, \verb|FLASK_DEBUG|;
+    \item Установить зависимости;
+\end{enumerate}
+
+Составляем из всего вышесказанного \verb|Dockerfile|, получим:
+\begin{verbatim}
+FROM tiangolo/uwsgi-nginx-flask:python3.8-alpine
+RUN apk --update add bash vim
+ENV STATIC_URL /static
+ENV STATIC_PATH /app/app/static
+ENV FLASK_ENV development
+ENV FLASK_DEBUG 1
+COPY ./requirements.txt /var/www/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /var/www/requirements.txt
+\end{verbatim}
+
+
+Далее определим параметры запуска самого контейнера:
+\begin{itemize}
+    \item Именем контейнера будет являться \verb|flask-server|;
+    \item Директория, в которой находится \verb|Dockerfile| -- \verb|flask_server|;
+    \item Соответствие портов на хосте docker и в самом контейнере -- \verb|56733:80|;
+    \item Директория с кодом должна распологаться в контейнере в папке \verb|app| (для запуска).
+\end{itemize}
+
+Получим сегмент конфигурационного файла для развертывания сервера:
+\begin{verbatim}
+flask-server:
+  container_name: flask-server
+  build:
+    context: ./flask_server
+    dockerfile: ./Dockerfile
+  ports:
+    - 56733:80
+  volumes:
+    - ./flask_server:/app
+\end{verbatim}
+
+Для того, чтобы Flask приложение запускалось, создадим файл \verb|uwsgi.ini| со следующим содержанием:
+\begin{verbatim}
+[uwsgi]
+module = main
+callable = app
+master = true
+touch-reload = /app/uwsgi.ini
+\end{verbatim}
+
+Таким образом мы сообщаем uwsgi (он, в свою очередь будет общаться с Nginx), что
+код запуска приложения будет находится в файле \verb|main.py|, а вызываемая
+функция будет называться \verb|app|. Также данный объект будет является мастер
+узлом и для того, чтобы его перезагрузить, надо вызвать команду \verb|touch
+/app/uwsgi.ini|.
+
+Файл \verb|main.py| будет загружать решение из поддиректории: \verb|from app
+import app|.
+
+Далее, в поддиректории \verb|app| создаем файл \verb|__init__.py| (который
+отвечает за то, как эта директория импортируется). В нем мы указываем что будем
+работать с модулем Flask. Затем в этом же файле мы создаем инициализируем
+веб-сервер (начинаем с ним работу) и импортируем функции из файла
+\verb|views.py|.
+\begin{verbatim}
+from flask import Flask
+app = Flask(__name__)
+from app import views
+\end{verbatim}
+
+Файл \verb|views.py| будет содержать генерации и отображения отображения страниц
+пользователю.
+
+% TODO: не знаю, нужно ли указывать тут сами html страницы, т.к. много текста
+% выйдет
+Первым делом необходимо добавить домашнюю страницу:
+\begin{verbatim}
+@app.route('/')
+def home():
+    return render_template('home.html')
+\end{verbatim}
+
+\verb|render_template| позволяет передавать в шаблонизатор \verb|Jinja|
+параметры для динамической генерации html страниц.
+
+% TODO: сделать сноску что делают декораторы в python
+В декораторе \verb|app.route| необходимо указать уникальный путь, за который
+будет отвечать данная функция. Также там можно указать за какие методы запросов
+данная функция будет отвечать (GET, POST, PATCH и так далее)
+
+На главной странице присутствует ссылка по переходу на страницу по поиску
+алгоритмов. Напишем для этой страницы обработчик. Указываем относительный путь,
+который будет обрабатываться функцией и объявляем ее:
+\begin{verbatim}
+@app.route('/search_by_name', methods=["GET", "POST"])
+def search_by_name():
+\end{verbatim}
+
+Затем, если был использован GET запрос, то из адрессной строки можно выбрать
+параметры запроса. Этим и займемся. 
+\begin{verbatim}
+search_object = request.args.get("search_object")
+search_lang = request.args.get("search_lang")
+\end{verbatim}
+
+Если хотя бы один из параметров пустой, то возвращаем поисковую страницу, на
+которой эти параметры можно заполнить.
+\begin{verbatim}
+if search_object is None and search_lang is None:
+    return render_template('search_by_name.html')
+\end{verbatim}
+
+Если запрос не подходит под это условие, значит: либо мы сами сконструировали
+URL адресс и хотим сделать запрос, либо мы уже были на этой странице и уже
+заполнили все необходимые параметры. В любом из этих случаев нам необходимо
+произвести запросы к базе данных и вернуть пользователю информацию.
+
+Для начала составляем запрос для поиска сохраненных репозиториев в elastic search:
+\begin{verbatim}
+data_for_cache_hits = {
+    "query": {
+        "bool": {
+            "must": [
+                {"match": {"topic": search_object}},
+                {"match": {"language": search_lang}},
+            ]
+        }
+    },
+}
+\end{verbatim}
+
+Затем отправляем этот запрос на сервер с elasticsearch:
+\begin{verbatim}
+s = requests.Session()
+retries = Retry(total=5,
+                backoff_factor=0.1,
+                status_forcelist=[500,502,503,504])
+s.mount('http://', HTTPAdapter(max_retries=retries))
+params = {'size': 10000, }
+es_hits_resp = s.get('http://elasticsearch:9200/algorithms-events/_search',
+                     params=params,
+                     json=data_for_cache_hits,
+                     verify=False)
+es_hits_data = es_hits_resp.json()
+\end{verbatim}
+
+Обрабатываем полученные данные и возвращаем страницу пользователю:
+\begin{verbatim}
+hits_qty = es_hits_data['hits']['total']
+hits_data = [hit['_source'] for hit in es_hits_data['hits']['hits']]
+
+for hit in hits_data:
+    hit['popularity'] = int(hit['popularity'])
+return render_template('search_by_name.html',
+                        search_object=search_object,
+                        search_lang=search_lang,
+                        hits_data=hits_data)
+\end{verbatim}
+
+Следует дополнить данный функционал запросами по обновлению данных в
+elasticsearch и по очистке этих данных.
+\begin{verbatim}
+@app.route('/update_es', methods=["GET"])
+def update_es():
+    topic = request.args.get("topic")
+    language = request.args.get("language")
+    params = {
+        "project":  "algo_search",
+        "spider":   "github",
+        "topic":    topic,
+        "language": language,
+    }
+    with requests.post("http://scrapyd:6800/schedule.json", params=params) as resp:
+        print(resp.status_code)
+        print(resp.json())
+
+    return redirect(url_for("search_by_name",
+                            search_object=topic,
+                            search_lang=language))
+
+@app.route('/clear_es', methods=["GET"])
+def clear_es():
+    topic = request.args.get("topic")
+    language = request.args.get("language")
+
+    data = {"query": {"match_all": {}}}
+    with requests.post("http://elasticsearch:9200/algorithms-events/_delete_by_query",
+                       json=data) as resp:
+        print(resp.status_code)
+        print(resp.json())
+
+    return redirect(url_for("search_by_name",
+                            search_object=topic,
+                            search_lang=language))
+\end{verbatim}
+
+Конечная структура директории веб-сервиса:
+\begin{verbatim}
+.
+├── app
+│   ├── __init__.py
+│   ├── static
+│   │   └── styles
+│   │       └── main.css
+│   ├── templates
+│   │   ├── home.html
+│   │   ├── layout.html
+│   │   ├── search_by_name.html
+│   └── views.py
+├── Dockerfile
+├── main.py
+├── requirements.txt
+└── uwsgi.ini
+\end{verbatim}
+
+% TODO: проверка работы
 
 \subsection{Scrapyd}
-\subsection{Flask}
-\subsection{Kafka Connect}
+Выбираем картинку \verb|vimagick/scrapyd:py3|. Далее устанавливаем зависимости
+добавляя в нее новый слой. Получаем \verb|Dockerfile|:
+\begin{verbatim}
+FROM vimagick/scrapyd:py3
+COPY requirements.pip ./
+RUN pip install -r requirements.pip
+\end{verbatim}
+
+Даем запускаемому контейнеру имя \verb|scrapyd| и указываем в какой директории
+находится файл для сборки. Также указываем соответствие портов на хосте и в
+контейнере \verb|6800:6800|.
+
+Для того, чтобы находящиеся там проекты Scrapy не удалялись, необходимо
+настроить синхронизацию папок: создаем папку \verb|scrapyd-data| и указываем ей
+в соответствие папку \verb|/var/lib/scrapyd|.
+
+Для того, чтобы положить пауков на этот сервер, используем утилиту
+\verb|scrapyd-deploy|.
+
+Также можно зайти на адресс, по которому расположен сервер и посмотреть
+информацию по находящимся там web-паукам и задачам. Например, зайдя на адресс
+\verb|http://localhost:6800/listprojects.json| можно посмотреть список доступных
+проектов, а сделав POST-запрос на адресс
+\verb|http://localhost:6800/schedule.json| можно запустить конкретного паука.
+
+% TODO: проверка работы
