@@ -5,6 +5,7 @@
 
 \usepackage{totcount}
 
+
 \newtotcounter{citnum} %From the package documentation
 \def\oldbibitem{} \let\oldbibitem=\bibitem
 \def\bibitem{\stepcounter{citnum}\oldbibitem}
@@ -48,6 +49,18 @@
 \rfoot{}
 
 \renewcommand{\contentsname}{СОДЕРЖАНИЕ}
+
+\setlist{
+    % noitemsep,
+    % topsep=0pt,
+    % parsep=0pt,
+    % partopsep=0pt,
+    leftmargin=2.1cm,
+    labelindent=\parindent,
+    labelwidth=\wd1,
+    itemindent=*,
+    % labelsep=\dimexpr0.6cm-\wd1
+}
 
 \begin{document}
 
