@@ -20,7 +20,7 @@
 }
 \addto\captionsrussian{%содержание
  \def\contentsname{%
-  \CYRS\cyro\cyrd\cyre\cyrr\cyrzh\cyra\cyrn\cyri\cyre}%
+     \normalfont{\CYRS\CYRO\CYRD\CYRE\CYRR\CYRZH\CYRA\CYRN\CYRI\CYRE}}%
 }
 \newenvironment{abstract}{%То же самое, только как у белых людей -- Коротков И.
  \Referat
@@ -40,21 +40,21 @@
            \cyrs\cyro\cyrk\cyrr\cyra\cyrshch\cyre\cyrn\cyri\cyrya}%
 }
 \newcommand\Introduction{%введение
- \chapter*{\CYRV\cyrv\cyre\cyrd\cyre\cyrn\cyri\cyre}%
- \addcontentsline{toc}{chapter}{Введение}
+    \chapter*{\normalfont{\CYRV\CYRV\CYRE\CYRD\CYRE\CYRN\CYRI\CYRE}}%
+ \addcontentsline{toc}{chapter}{ВВЕДЕНИЕ}
 }
 \newcommand\Main{%введение
 %  \chapter*{Основная часть}%
- \addcontentsline{toc}{chapter}{Основная часть}
+ \addcontentsline{toc}{chapter}{ОСНОВНАЯ ЧАСТЬ}
 }
 \newcommand\Conclusion{%заключение
- \chapter{\CYRZ\cyra\cyrk\cyrl\cyryu\cyrch\cyre\cyrn\cyri\cyre}%
+    \chapter{\normalfont{\CYRZ\CYRA\CYRK\CYRL\CYRYU\CYRCH\CYRE\CYRN\CYRI\CYRE}}%
 }
 \addto\captionsrussian{%список использованных источников
  \def\bibname{%
-  \CYRS\cyrp\cyri\cyrs\cyro\cyrk~
-  \cyri\cyrs\cyrp\cyro\cyrl\cyrsftsn\cyrz\cyro\cyrv\cyra\cyrn\cyrn\cyrery\cyrh~
-  \cyri\cyrs\cyrt\cyro\cyrch\cyrn\cyri\cyrk\cyro\cyrv}%
+     \normalfont{\CYRS\CYRP\CYRI\CYRS\CYRO\CYRK~
+  \CYRI\CYRS\CYRP\CYRO\CYRL\CYRSFTSN\CYRZ\CYRO\CYRV\CYRA\CYRN\CYRN\CYRERY\CYRH~
+  \CYRI\CYRS\CYRT\CYRO\CYRCH\CYRN\CYRI\CYRK\CYRO\CYRV}}%
 }
 
 %Элементы оформления титульной страницы
