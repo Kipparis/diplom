@@ -19,11 +19,13 @@
 возникшие проблемы и пути решения.
 
 \section{UML диаграмма}
-Для наглядной демонстрации ожидаемого поведения удобно использовать подвид UML диаграмм -- диаграмму активностей.
+Для наглядной демонстрации ожидаемого поведения удобно использовать подвид UML
+диаграмм -- диаграмму активностей. Она приведена на рисунке \ref{fig:uml-diag}.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.55]{inc/img/activity_diagram.png}
     \caption{Диаграмма активностей для проекта}
+    \label{fig:uml-diag}
 \end{figure}
 
 С помощью данной диаграммы можно донести общую концепцию инфраструктуры. Также
@@ -34,11 +36,13 @@
 После составления UML диаграммы можно определить свойства компонентов и
 произвести их выбор.
 
-Для наглядности составим архитектуру всего приложения.
+Для наглядности составим архитектуру всего приложения и приведем ее на рисунке
+\ref{fig:structure}.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.70]{inc/img/structure.png}
+    \includegraphics[scale=0.80]{inc/img/structure.png}
     \caption{Архитектура приложения}
+    \label{fig:structure}
 \end{figure}
 
 В качестве web-сервера выбран Nginx с его "event based" моделью обработки
@@ -114,13 +118,16 @@ URL, особенно если составляешь его из входных
 def __init__(self, topic=None, language=None, *args, **kwargs):
     super(GithubSpider, self).__init__(*args, **kwargs)
 
-    assert topic is not None, "you should provide topic variable via cmd"
+    assert topic is not None, \
+        "you should provide topic variable via cmd"
     self.topic = topic
 
     params = { "q": topic, }
     if language is not None:
-        params.update({"l": self.custom_settings["lang_mapping"][language]})
-    self.start_urls = [f"https://github.com/search?"+urlencode(params)]
+        params.update(
+            {"l": self.custom_settings["lang_mapping"][language]})
+    self.start_urls = [
+        f"https://github.com/search?"+urlencode(params)]
 \end{verbatim}
 
 % TODO: сделать сноску с примером разбора xpath селектора
@@ -138,16 +145,21 @@ def __init__(self, topic=None, language=None, *args, **kwargs):
 \begin{verbatim}
 def parse(self, response):
     # если есть следующая страница, запускаемся на следующей
-    next_page = response.xpath('//a[@class="next_page"]/@href').get()
+    next_page = (response
+                 .xpath('//a[@class="next_page"]/@href')
+                 .get())
     if next_page is not None:
-        # response.follow нативно поддерживает переход по относительным url
+        # response.follow нативно поддерживает переход
+        # по относительным url
         yield response.follow(next_page, callback=self.parse)
 
     # находим репозитории на текущей странице
-    repos_selector = response.xpath('//li[contains(@class, "repo-list-item")]'
-                                    '//div[contains(@class, "text-normal")]'
-                                    '/a')
-    yield from response.follow_all(repos_selector, self.parse_repo)
+    repos_selector = response.xpath(
+        '//li[contains(@class, "repo-list-item")]'
+        '//div[contains(@class, "text-normal")]'
+        '/a')
+    yield from response.follow_all(repos_selector,
+                                   self.parse_repo)
 \end{verbatim}
 
 Далее нужно запарсить каждый отдельный репозиторий. Для этого реализиуем
@@ -161,10 +173,12 @@ c++ или как cpp). В конце возвращаем словарь из �
 def parse_repo(self, response):
     ### язык кода
     ### берем первый из списка, на проценты не смотрим
-    language = response.xpath(
-        '//h2[text() = "Languages"]/parent::div/ul/li/a/span/text()').get()
-    # если существует конверсия в мой внутренний тип языка, то используем
-    # его
+    language = (response
+                .xpath('//h2[text() = "Languages"]'
+                       '/parent::div/ul/li/a/span/text()')
+                .get())
+    # если существует конверсия в мой внутренний тип языка,
+    # то используем его
     for key, val in self.custom_settings["lang_mapping"].items():
         if language == val:
             language = key
@@ -214,7 +228,8 @@ class AlgoSearchPipeline:
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            kafka_bootstrap_server=crawler.settings.get('KAFKA_BOOTSTRAP_SERVER'),
+            kafka_bootstrap_server=(crawler.settings
+                                    .get('KAFKA_BOOTSTRAP_SERVER')),
             kafka_topic=crawler.settings.get('KAFKA_TOPIC')
         )
 \end{verbatim}
@@ -226,7 +241,8 @@ class AlgoSearchPipeline:
 def open_spider(self, spider):
     self.producer = KafkaProducer(
         bootstrap_servers=[self.kafka_bootstrap_server],
-        value_serializer=lambda val: json.dumps(val,ensure_ascii=False).encode('utf-8'))
+        value_serializer=(lambda val:
+            json.dumps(val,ensure_ascii=False).encode('utf-8')))
 \end{verbatim}
 
 Добавляем логику собственно отправки сообщения. В данной блоке кода мы вместе с
@@ -378,8 +394,10 @@ kafka:
   environment:
     KAFKA_BROKER_ID: 1
     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
-    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+    KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,\
+        PLAINTEXT_HOST://kafka:29092"
+    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,\
+        PLAINTEXT_HOST:PLAINTEXT"
     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 \end{verbatim}
 
@@ -473,7 +491,7 @@ elasticsearch:
     \item \verb|CONNECT_CONFIG_STORAGE_TOPIC|,
         \verb|CONNECT_OFFSET_STORAGE_TOPIC|, \verb|CONNECT_STATUS_STORAGE_TOPIC|
         -- имена топиков, в которых сохранять служебную информацию;
-    \item \verb|CONNECT_REPLICATION_FACTOR|,
+    \item \verb|CONNECT_REPLICATION_FACTOR|,\\
         \verb|CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR|,
         \verb|CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR|,
         \verb|CONNECT_STATUS_STORAGE_REPLICATION_FACTOR| -- отвечают за
@@ -512,11 +530,15 @@ connect:
     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-    CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
-    CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+    CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.\
+        storage.StringConverter"
+    CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.\
+        json.JsonConverter"
     CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-    CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-    CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+    CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.\
+        json.JsonConverter"
+    CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.\
+        json.JsonConverter"
     CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
     CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181
     CONNECT_PLUGIN_PATH: /connect-plugins
@@ -558,7 +580,8 @@ ENV STATIC_PATH /app/app/static
 ENV FLASK_ENV development
 ENV FLASK_DEBUG 1
 COPY ./requirements.txt /var/www/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /var/www/requirements.txt
+RUN pip install --no-cache-dir --upgrade\
+    -r /var/www/requirements.txt
 \end{verbatim}
 
 
@@ -681,7 +704,8 @@ retries = Retry(total=5,
                 status_forcelist=[500,502,503,504])
 s.mount('http://', HTTPAdapter(max_retries=retries))
 params = {'size': 10000, }
-es_hits_resp = s.get('http://elasticsearch:9200/algorithms-events/_search',
+es_hits_resp = s.get('http://elasticsearch:9200/'
+                     'algorithms-events/_search',
                      params=params,
                      json=data_for_cache_hits,
                      verify=False)
@@ -714,7 +738,8 @@ def update_es():
         "topic":    topic,
         "language": language,
     }
-    with requests.post("http://scrapyd:6800/schedule.json", params=params) as resp:
+    with requests.post("http://scrapyd:6800/schedule.json",
+                       params=params) as resp:
         print(resp.status_code)
         print(resp.json())
 
@@ -728,7 +753,8 @@ def clear_es():
     language = request.args.get("language")
 
     data = {"query": {"match_all": {}}}
-    with requests.post("http://elasticsearch:9200/algorithms-events/_delete_by_query",
+    with requests.post("http://elasticsearch:9200/"
+                       "algorithms-events/_delete_by_query",
                        json=data) as resp:
         print(resp.status_code)
         print(resp.json())
@@ -741,20 +767,20 @@ def clear_es():
 Конечная структура директории веб-сервиса:
 \begin{verbatim}
 .
-├── app
-│   ├── __init__.py
-│   ├── static
-│   │   └── styles
-│   │       └── main.css
-│   ├── templates
-│   │   ├── home.html
-│   │   ├── layout.html
-│   │   ├── search_by_name.html
-│   └── views.py
-├── Dockerfile
-├── main.py
-├── requirements.txt
-└── uwsgi.ini
+|-- app
+|   |-- __init__.py
+|   |-- static
+|   |   |-- styles
+|   |       |-- main.css
+|   |-- templates
+|   |   |-- home.html
+|   |   |-- layout.html
+|   |   |-- search_by_name.html
+|   |-- views.py
+|-- Dockerfile
+|-- main.py
+|-- requirements.txt
+|-- uwsgi.ini
 \end{verbatim}
 
 % TODO: проверка работы
