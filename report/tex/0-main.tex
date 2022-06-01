@@ -31,9 +31,21 @@
 \pretocmd{\chapter}{\addtocounter{totfigures}{\value{figure}}\setcounter{figure}{0}}{}{}
 \pretocmd{\chapter}{\addtocounter{tottables}{\value{table}}\setcounter{table}{0}}{}{}
 
+\renewcommand{\figurename}{Рисунок}
+\addto\captionsrussian{\renewcommand{\figurename}{Рисунок}}
+
 
 % Остальные стандартные настройки убраны в preamble.inc.tex.
 \include{10-preamble}
+
+\usepackage{fancyhdr}
+\pagestyle{plain}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
 
 \begin{document}
 
